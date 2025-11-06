@@ -229,23 +229,6 @@ vercel --prod
 - Environment variables via platform UI
 - Nginx/Apache or serverless runtime
 
-#### Configuration Checklist
-- [x] Environment variables set on platform
-- [x] Database migrations run (`php artisan migrate --force`)
-- [x] Storage linked (`php artisan storage:link`)
-- [x] Queue worker configured (for async click tracking)
-- [x] SSL certificate (auto via platform)
-- [x] CDN for assets (optional: Cloudflare)
-- [x] Cron job for `links:cleanup-expired` (daily)
-
-#### Scaling Strategy
-**For 10,000 requests/second:**
-1. **Database**: Read replicas for analytics queries
-2. **Caching**: Redis for short code → URL lookups
-3. **CDN**: Cloudflare in front of app
-4. **Horizontal scaling**: Load balancer + multiple app instances
-5. **Analytics**: Move to time-series DB (InfluxDB) or data warehouse (BigQuery)
-6. **Async processing**: Queue all click tracking (don't block redirects)
 
 ---
 
@@ -517,8 +500,6 @@ I never blindly accepted AI output. Every suggestion was:
 - [x] **CSV Export** - Download analytics data for client reporting
 - [x] **REST API** - Programmatic access with Sanctum authentication
 - [x] **Search & Filter** - Find links by URL, alias, or title
-- [x] **Link Expiration** - Set expiry dates for time-limited campaigns
-- [x] **Link Toggle** - Activate/deactivate links without deletion
 - [x] **Chart Visualizations** - Interactive graphs (Chart.js)
 
 ---
