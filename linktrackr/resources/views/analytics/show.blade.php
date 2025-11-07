@@ -78,35 +78,43 @@
                 </div>
             </div>
 
-            <!-- Charts Row 1 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Clicks Over Time -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Clicks Over Time</h3>
-                    <canvas id="clicksChart" height="250"></canvas>
+        <!-- Charts Row 1 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Clicks Over Time -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Clicks Over Time</h3>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="clicksChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Device Breakdown -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Device Breakdown</h3>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="deviceChart"></canvas>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Device Breakdown -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Device Breakdown</h3>
-                    <canvas id="deviceChart" height="250"></canvas>
-                </div>
-            </div>
+                <!-- Charts Row 2 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Top Countries -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Countries</h3>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="countryChart"></canvas>
+                        </div>
+                    </div>
 
-            <!-- Charts Row 2 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Top Countries -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Countries</h3>
-                    <canvas id="countryChart" height="250"></canvas>
+                    <!-- Top Referrers -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Referrers</h3>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="referrerChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Top Referrers -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Referrers</h3>
-                    <canvas id="referrerChart" height="250"></canvas>
-                </div>
-            </div>
 
             <!-- Detailed Tables -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -184,11 +192,14 @@
 <!-- Chart.js Library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
 <script>
-// Prepare data from PHP
+// Preparar datos desde PHP
 const analyticsData = @json($analytics);
 
-// Chart colors
+// Colores
 const colors = {
     primary: 'rgb(59, 130, 246)',
     success: 'rgb(34, 197, 94)',
@@ -198,115 +209,146 @@ const colors = {
     gray: 'rgb(107, 114, 128)',
 };
 
+// Configuración global de Chart.js
+Chart.defaults.responsive = true;
+Chart.defaults.maintainAspectRatio = false;
+
 // 1. Clicks Over Time Chart
 const clicksData = analyticsData.clicks_by_date.reverse();
-const clicksCtx = document.getElementById('clicksChart').getContext('2d');
-new Chart(clicksCtx, {
-    type: 'line',
-    data: {
-        labels: clicksData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
-        datasets: [{
-            label: 'Clicks',
-            data: clicksData.map(d => d.count),
-            borderColor: colors.primary,
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.4,
-            fill: true,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
+const clicksCtx = document.getElementById('clicksChart');
+
+if (clicksCtx) {
+    new Chart(clicksCtx, {
+        type: 'line',
+        data: {
+            labels: clicksData.map(d => {
+                const date = new Date(d.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }),
+            datasets: [{
+                label: 'Clicks',
+                data: clicksData.map(d => d.count),
+                borderColor: colors.primary,
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { precision: 0 }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    display: false 
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { 
+                        precision: 0 
+                    }
+                }
             }
         }
-    }
-});
+    });
+}
 
 // 2. Device Breakdown Chart (Doughnut)
 const deviceData = analyticsData.clicks_by_device;
-const deviceCtx = document.getElementById('deviceChart').getContext('2d');
-new Chart(deviceCtx, {
-    type: 'doughnut',
-    data: {
-        labels: deviceData.map(d => d.device_type.charAt(0).toUpperCase() + d.device_type.slice(1)),
-        datasets: [{
-            data: deviceData.map(d => d.count),
-            backgroundColor: [colors.primary, colors.success, colors.warning],
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
+const deviceCtx = document.getElementById('deviceChart');
+
+if (deviceCtx) {
+    new Chart(deviceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: deviceData.map(d => d.device_type.charAt(0).toUpperCase() + d.device_type.slice(1)),
+            datasets: [{
+                data: deviceData.map(d => d.count),
+                backgroundColor: [colors.primary, colors.success, colors.warning],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
             }
         }
-    }
-});
+    });
+}
 
 // 3. Top Countries Chart (Horizontal Bar)
 const countryData = analyticsData.clicks_by_country.slice(0, 5);
-const countryCtx = document.getElementById('countryChart').getContext('2d');
-new Chart(countryCtx, {
-    type: 'bar',
-    data: {
-        labels: countryData.map(d => d.country_name),
-        datasets: [{
-            label: 'Clicks',
-            data: countryData.map(d => d.count),
-            backgroundColor: colors.success,
-        }]
-    },
-    options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
+const countryCtx = document.getElementById('countryChart');
+
+if (countryCtx) {
+    new Chart(countryCtx, {
+        type: 'bar',
+        data: {
+            labels: countryData.map(d => d.country_name || 'Unknown'),
+            datasets: [{
+                label: 'Clicks',
+                data: countryData.map(d => d.count),
+                backgroundColor: colors.success,
+            }]
         },
-        scales: {
-            x: {
-                beginAtZero: true,
-                ticks: { precision: 0 }
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    display: false 
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { 
+                        precision: 0 
+                    }
+                }
             }
         }
-    }
-});
+    });
+}
 
 // 4. Top Referrers Chart (Horizontal Bar)
 const referrerData = analyticsData.clicks_by_referrer.slice(0, 5);
-const referrerCtx = document.getElementById('referrerChart').getContext('2d');
-new Chart(referrerCtx, {
-    type: 'bar',
-    data: {
-        labels: referrerData.map(d => d.referrer_domain || 'Direct'),
-        datasets: [{
-            label: 'Clicks',
-            data: referrerData.map(d => d.count),
-            backgroundColor: colors.purple,
-        }]
-    },
-    options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
+const referrerCtx = document.getElementById('referrerChart');
+
+if (referrerCtx) {
+    new Chart(referrerCtx, {
+        type: 'bar',
+        data: {
+            labels: referrerData.map(d => d.referrer_domain || 'Direct'),
+            datasets: [{
+                label: 'Clicks',
+                data: referrerData.map(d => d.count),
+                backgroundColor: colors.purple,
+            }]
         },
-        scales: {
-            x: {
-                beginAtZero: true,
-                ticks: { precision: 0 }
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    display: false 
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { 
+                        precision: 0 
+                    }
+                }
             }
         }
-    }
-});
+    });
+}
 </script>
