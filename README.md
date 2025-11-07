@@ -64,6 +64,8 @@ npm install
 cp .env.example .env
 php artisan key:generate
 ```
+composer require jenssegers/agent
+
 
 5. **Update `.env` file**
 ```env
